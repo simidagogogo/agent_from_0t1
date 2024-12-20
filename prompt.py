@@ -6,22 +6,15 @@
 @Author  : Liuyz
 @Date    : 2024/6/28 15:58
 @Function: 
-
-@Modify History:
-         
-@Copyright：Copyright(c) 2024-2026. All Rights Reserved
-=================================================="""
-from tools import gen_tools_desc
-
-"""
         prompt包含的功能:
             1、任务的描述
             2、工具的描述
-            3、用户的输入user_msg: 
+            3、用户的输入user_msg:
             4、assistant_msg:
             5、结果的限制
             6、给出更好实践的描述
-        """
+=================================================="""
+from tools import gen_tools_desc
 constraints = [
     "仅使用下面列出的动作",
     "你只能主动行动，在计划行动时需要考虑这一点",
@@ -42,27 +35,26 @@ best_practices = [
 ]
 prompt_template = """
     你是一个问答专家，你必须始终独立做出决策，无需寻求用户的帮助，发挥你作为LLM的优势，追求简答的策略，不要涉及法律的问题。
+        
+    目标:
+    {query}
+    限制条件说明:
+    {constraints}
     
-目标:
-{query}
-限制条件说明:
-{constraints}
-
-动作说明:这是你唯一可使用的动作，你的任何操作都必须通过以下操作实现：
-{actions}
-
-资源说明:
-{resources}
-
-最佳实践的说明:
-{best_practices}
-
-agent_scratch:{agent_scratch}
-
-你应该以json格式响应,响应格式如下:
-{response_format_prompt}
-确保响应结果可以由python json.loads()成功加载。
-
+    动作说明:这是你唯一可使用的动作，你的任何操作都必须通过以下操作实现：
+    {actions}
+    
+    资源说明:
+    {resources}
+    
+    最佳实践的说明:
+    {best_practices}
+    
+    agent_scratch:{agent_scratch}
+    
+    你应该以json格式响应,响应格式如下:
+    {response_format_prompt}
+    确保响应结果可以由python json.loads()成功加载。
 """
 
 response_format_prompt = """
@@ -88,7 +80,6 @@ constraints_prompt = "\n".join([f"{idx+1}.{con}" for idx, con in enumerate(const
 resources_prompt = "\n".join([f"{idx+1}.{con}" for idx, con in enumerate(resources)])
 best_practices_prompt = "\n".join([f"{idx+1}.{con}" for idx, con in enumerate(best_practices)])
 
-
 def gen_prompt(query, agent_scratch):
     """
     :param query:
@@ -105,6 +96,5 @@ def gen_prompt(query, agent_scratch):
         response_format_prompt=response_format_prompt
     )
     return prompt
-
 
 user_prompt = "根据给定的目标和迄今为止取得的进展，确定下一个要执行action，并使用前面指定的JSON模式进行响应："
