@@ -5,18 +5,12 @@
 @File    : llm_api.py
 @Author  : Liuyz
 @Date    : 2024/6/28 17:03
-@Function: 
-
-@Modify History:
-         
-@Copyright：Copyright(c) 2024-2026. All Rights Reserved
 =================================================="""
 # 业务空间模型调用请参考文档传入workspace信息: https://help.aliyun.com/document_detail/2746874.html
 
 import random
 from http import HTTPStatus
 from dashscope import Generation
-
 
 def call_stream_with_messages():
     messages = [
@@ -29,6 +23,7 @@ def call_stream_with_messages():
         stream=True,
         output_in_full=True  # get streaming output incrementally
     )
+
     full_content = ''
     for response in responses:
         if response.status_code == HTTPStatus.OK:

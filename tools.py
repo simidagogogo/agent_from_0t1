@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-"""=================================================
+
+"""
 @PROJECT_NAME: agent_example
 @File    : tools.py
 @Author  : Liuyz
@@ -10,17 +11,19 @@
     2、读文件
     3、追加的方式写
     4、专业领域知识的获取(网络搜索)
-=================================================="""
+"""
+
 import json
 import os
-from langchain_community.tools.tavily_search import TavilySearchResults
+# from langchain_community.tools.tavily_search import TavilySearchResults
 
 def _get_workdir_root():
-    return os.environ.get('WORKDIR_ROOT', "./data/llm_result")
+    workdir_root = os.environ.get('WORKDIR_ROOT', "./data/llm_result")
+    return workdir_root
 
 WORKDIR_ROOT = _get_workdir_root()
 
-def read_file(filename):
+def read_file(filename) -> str:
     filename = os.path.join(WORKDIR_ROOT, filename)
     if not os.path.exists(filename):
         return f"{filename} not exit, please check file exist before read"
@@ -28,15 +31,18 @@ def read_file(filename):
     with open(filename, 'r', encoding="utf-8") as f:
         return "\n".join(f.readlines())
 
-def append_to_file(filename, content):
+
+def append_to_file(filename, content) -> str:
     filename = os.path.join(WORKDIR_ROOT, filename)
     if not os.path.exists(filename):
         return f"{filename} not exit, please check file exist before read"
+
     with open(filename, 'a') as f:
         f.write(content)
     return "append_content to file success."
 
-def write_to_file(filename, content):
+
+def write_to_file(filename, content) -> str:
     filename = os.path.join(WORKDIR_ROOT, filename)
     if not os.path.exists(WORKDIR_ROOT):
         os.makedirs(WORKDIR_ROOT)
@@ -63,10 +69,12 @@ def search(query) -> str:
     except Exception as e:
         return "search error:{}".format(e)
 
+
+# 工具信息
 tools_info = [
     {
         "name": "read_file",
-        "description": "read file form agent generate, should write file before read",
+        "description": "read file from agent generate, should write file before read",
         "args": [
             {
                 "name": "filename",
@@ -79,18 +87,19 @@ tools_info = [
         "name": "append_to_file",
         "description": "append llm content to file, should write file before read",
         "args":
-            [{
-                "name": "filename",
-                "type": "string",
-                "description": "file name"
-            }]
+            [
+                {
+                    "name": "filename",
+                    "type": "string",
+                    "description": "file name"
+                },
+                {
+                    "name": "content",
+                    "type": "string",
+                    "description": "append to file content"
+                }
+            ]
     },
-    {
-        "name": "",
-
-        "type": "string",
-        "description": "append to file content"
-    }
     {
         "name": "write_to_file",
         "description": "write llm content to file",
@@ -120,8 +129,7 @@ tools_info = [
     },
     {
         "name": "search",
-        "description": "this is a search engine, you can gain additional knowledge though this search engine "
-                       "when you are unsure of large model return",
+        "description": "this is a search engine, you can gain additional knowledge though this search engine when you are unsure of large model return",
         "args": [
             {
                 "name": "query",
@@ -132,6 +140,7 @@ tools_info = [
     }
 ]
 
+# action-name到函数的映射 map -> {"action_name" : func}
 tools_map = {
     "read_file": read_file,
     "append_to_file": append_to_file,
@@ -139,25 +148,28 @@ tools_map = {
     "search": search
 }
 
-def gen_tools_desc():
+def gen_desc(arr) -> str:
+    return "\n".join([f"{idx + 1}.{con}" for idx, con in enumerate(arr)])
+
+def gen_tools_desc() -> str:
     """
     生成工具描述
-    :return:
+    :return: str
     """
     tools_desc = []
-    for idx, t in enumerate(tools_info):
+    for idx, tool in enumerate(tools_info):
         args_desc = []
-        for info in t["args"]:
-            args_desc.append({
-                "name": info["name"],
-                "description": info["description"],
-                "type": info["type"]
-            })
+        # print(f"tool: {tool}")
+        for info in tool['args']:
+            args_desc.append(
+                {
+                    "name": info["name"],
+                    "description": info["description"],
+                    "type": info["type"]
+                }
+            )
         args_desc = json.dumps(args_desc, ensure_ascii=False)
-        tool_desc = f"{idx+1}.{t['name']}:{t['description']}, args: {args_desc}"
+        tool_desc = f"{idx + 1}. {tool['name']}: {tool['description']}, args: {args_desc}"
         tools_desc.append(tool_desc)
     tools_prompt = "\n".join(tools_desc)
     return tools_prompt
-
-
-
